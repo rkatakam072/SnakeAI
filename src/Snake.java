@@ -2,6 +2,7 @@ import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static processing.core.PApplet.floor;
 import static processing.core.PApplet.pow;
@@ -243,7 +244,9 @@ class Snake {
     }
 
     float[] lookInDirection(PVector direction) {
-        PApplet window = SnakeAI.instance;
+        PApplet window;
+        window = Objects.requireNonNullElseGet(SnakeAI.instance, PApplet::new);
+
         float look[] = new float[3];
         PVector pos = new PVector(head.x, head.y);
         float distance = 0;

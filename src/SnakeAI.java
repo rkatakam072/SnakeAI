@@ -25,7 +25,7 @@ public class SnakeAI extends PApplet {
 
     public static boolean humanPlaying = false;
     public static boolean replayBest = true;
-    public static boolean seeVision = true;
+    public static boolean seeVision = false;
     public static boolean modelLoaded = false;
 
     PFont font;
