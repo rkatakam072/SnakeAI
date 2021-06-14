@@ -9,7 +9,7 @@ import static processing.core.PApplet.pow;
 
 class Snake {
 
-    int score = 1;
+    private int score = 1;
     int lifeLeft = 200;
     int lifetime = 0;
     int xVel, yVel;
@@ -39,16 +39,16 @@ class Snake {
         head = new PVector(800, SnakeAI.height / 2f);
         food = new Food();
         body = new ArrayList<PVector>();
-        if (!SnakeAI.humanPlaying) {
-            vision = new float[24];
-            decision = new float[4];
-            foodList = new ArrayList<Food>();
-            foodList.add(food.clone());
-            brain = new NeuralNet(24, SnakeAI.hidden_nodes, 4, layers);
-            body.add(new PVector(800, (SnakeAI.height / 2f) + SnakeAI.SIZE));
-            body.add(new PVector(800, (SnakeAI.height / 2f) + (2 * SnakeAI.SIZE)));
-            score += 2;
-        }
+
+        vision = new float[24];
+        decision = new float[4];
+        foodList = new ArrayList<Food>();
+        foodList.add(food.clone());
+        brain = new NeuralNet(24, SnakeAI.hidden_nodes, 4, layers);
+        body.add(new PVector(800, (SnakeAI.height / 2f) + SnakeAI.SIZE));
+        body.add(new PVector(800, (SnakeAI.height / 2f) + (2 * SnakeAI.SIZE)));
+        score += 2;
+
     }
 
     Snake(ArrayList<Food> foods) {
@@ -109,10 +109,10 @@ class Snake {
 
     void move() {
         if (!dead) {
-            if (!SnakeAI.humanPlaying && !SnakeAI.modelLoaded) {
-                lifetime++;
-                lifeLeft--;
-            }
+
+            lifetime++;
+            lifeLeft--;
+
             if (foodCollide(head.x, head.y)) {
                 eat();
             }
@@ -121,7 +121,7 @@ class Snake {
                 dead = true;
             } else if (bodyCollide(head.x, head.y)) {
                 dead = true;
-            } else if (lifeLeft <= 0 && !SnakeAI.humanPlaying) {
+            } else if (lifeLeft <= 0) {
                 dead = true;
             }
         }
@@ -130,7 +130,6 @@ class Snake {
     void eat() {
         int len = body.size() - 1;
         score++;
-        if (!SnakeAI.humanPlaying && !SnakeAI.modelLoaded) {
             if (lifeLeft < 500) {
                 if (lifeLeft > 400) {
                     lifeLeft = 500;
@@ -138,7 +137,7 @@ class Snake {
                     lifeLeft += 100;
                 }
             }
-        }
+
         if (len >= 0) {
             body.add(new PVector(body.get(len).x, body.get(len).y));
         } else {
@@ -149,9 +148,8 @@ class Snake {
             while (bodyCollide(food.pos.x, food.pos.y)) {
                 food = new Food();
             }
-            if (!SnakeAI.humanPlaying) {
                 foodList.add(food);
-            }
+
         } else {
             food = foodList.get(foodItterate);
             foodItterate++;
@@ -293,7 +291,7 @@ class Snake {
     }
 
     void think() {
-        decision = brain.output(vision);
+        decision = brain.getOutput(vision);
         int maxIndex = 0;
         float max = 0;
         for (int i = 0; i < decision.length; i++) {
@@ -345,5 +343,9 @@ class Snake {
             xVel = SnakeAI.SIZE;
             yVel = 0;
         }
+    }
+
+    public int getScore() {
+        return score;
     }
 }

@@ -1,13 +1,12 @@
 public class Train {
-
     public static void main(String[] args) {
-        Population pop = Population.loadPopulation();
+        Population pop = new Population(1000);
         int highscore = 0;
 
         while (true) {
 
             if (pop.done()) {
-                highscore = pop.bestSnake.score;
+                highscore = pop.bestSnake.getScore();
                 pop.calculateFitness();
                 pop.naturalSelection();
                 pop.savePopulation();
@@ -17,4 +16,5 @@ public class Train {
             }
         }
     }
+
 }

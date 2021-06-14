@@ -1,36 +1,24 @@
 import processing.core.PApplet;
 
-class Matrix {
+public class Matrix {
+    private int rows, cols;
+    private float[][] matrix;
 
-    int rows, cols;
-    float[][] matrix;
+    public Matrix(int rows, int cols) {
+        this.rows = rows;
+        this.cols = cols;
 
-   transient PApplet window = SnakeAI.instance;
-
-    Matrix(int r, int c) {
-        rows = r;
-        cols = c;
         matrix = new float[rows][cols];
     }
 
-    Matrix(float[][] m) {
-        matrix = m;
-        rows = matrix.length;
-        cols = matrix[0].length;
+    public Matrix(float[][] matrix) {
+        this.matrix = matrix;
+
+        this.rows = matrix.length;
+        this.cols = matrix[0].length;
     }
 
-    void output() {
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                System.out.println(matrix[i][j] + " ");
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-    Matrix dot(Matrix n) {
-
+    public Matrix dot(Matrix n) {
         Matrix result = new Matrix(rows, n.cols);
 
 
@@ -45,11 +33,13 @@ class Matrix {
                 }
             }
         }
-
         return result;
+
+
+
     }
 
-    void randomize() {
+    public void randomize() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 matrix[i][j] = new PApplet().random(-1, 1);
@@ -57,15 +47,7 @@ class Matrix {
         }
     }
 
-    Matrix singleColumnMatrixFromArray(float[] arr) {
-        Matrix n = new Matrix(arr.length, 1);
-        for (int i = 0; i < arr.length; i++) {
-            n.matrix[i][0] = arr[i];
-        }
-        return n;
-    }
-
-    float[] toArray() {
+    public float[] toArray() {
         float[] arr = new float[rows * cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -75,7 +57,15 @@ class Matrix {
         return arr;
     }
 
-    Matrix addBias() {
+    public Matrix singleColumnMatrixFromArray(float[] arr) {
+        Matrix n = new Matrix(arr.length, 1);
+        for (int i = 0; i < arr.length; i++) {
+            n.matrix[i][0] = arr[i];
+        }
+        return n;
+    }
+
+    public Matrix addBias() {
         Matrix n = new Matrix(rows + 1, 1);
         for (int i = 0; i < rows; i++) {
             n.matrix[i][0] = matrix[i][0];
@@ -84,7 +74,7 @@ class Matrix {
         return n;
     }
 
-    Matrix activate() {
+    public Matrix activate() {
         Matrix n = new Matrix(rows, cols);
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -94,11 +84,11 @@ class Matrix {
         return n;
     }
 
-    float relu(float x) {
+    private float relu(float x) {
         return PApplet.max(0, x);
     }
 
-    void mutate(float mutationRate) {
+    public void mutate(float mutationRate) {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 float rand = new PApplet().random(1);
@@ -116,7 +106,7 @@ class Matrix {
         }
     }
 
-    Matrix crossover(Matrix partner) {
+    public Matrix crossover(Matrix partner) {
         Matrix child = new Matrix(rows, cols);
 
         int randC = PApplet.floor(new PApplet().random(cols));
@@ -135,12 +125,24 @@ class Matrix {
     }
 
     public Matrix clone() {
-        Matrix clone = new Matrix(rows, cols);
+        Matrix clone  =  new Matrix(rows, cols);
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 clone.matrix[i][j] = matrix[i][j];
             }
         }
         return clone;
+    }
+
+    public int getCols() {
+        return cols;
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public float[][] getMatrix() {
+        return matrix;
     }
 }

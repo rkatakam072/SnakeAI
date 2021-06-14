@@ -3,6 +3,7 @@ import com.google.gson.stream.JsonReader;
 import processing.core.PApplet;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 class Population {
@@ -38,14 +39,11 @@ class Population {
     }
 
     boolean done() {
-        for (int i = 0; i < snakes.length; i++) {
-            if (!snakes[i].dead)
-                return false;
-        }
-        if (!bestSnake.dead) {
+        if (Arrays.stream(snakes).parallel().anyMatch(snake -> !snake.dead)) {
             return false;
         }
-        return true;
+
+        return bestSnake.dead;
     }
 
     public synchronized void savePopulation() {
@@ -68,19 +66,23 @@ class Population {
             bestSnake.think();
             bestSnake.move();
         }
-        /*for(int i = 0; i < snakes.length; i++) {
-            if(!snakes[i].dead) {
-                snakes[i].look();
-                snakes[i].think();
-                snakes[i].move();
-            }
-        }*/
 
-        IntStream.range(0, snakes.length).parallel().forEach(i -> {
+
+        /*IntStream.range(0, snakes.length).parallel().forEach(i -> {
             if (!snakes[i].dead) {
                 snakes[i].look();
                 snakes[i].think();
                 snakes[i].move();
+            }
+        });*/
+
+
+        Arrays.stream(snakes).parallel().forEach(snake -> {
+
+            if (!snake.dead){
+                snake.look();
+                snake.think();
+                snake.move();
             }
         });
     }
@@ -108,7 +110,7 @@ class Population {
         if (max > bestFitness) {
             bestFitness = max;
             bestSnake = snakes[maxIndex].cloneForReplay();
-            bestSnakeScore = snakes[maxIndex].score;
+            bestSnakeScore = snakes[maxIndex].getScore();
         } else {
             bestSnake = bestSnake.cloneForReplay();
         }
@@ -142,26 +144,22 @@ class Population {
 
 
         snakes = newSnakes.clone();
-        //SnakeAI.evolution.add(bestSnakeScore);
         gen += 1;
     }
 
-    void mutate() {
-        for (int i = 1; i < snakes.length; i++) {
-            snakes[i].mutate();
-        }
-    }
-
     void calculateFitness() {
-        for (int i = 0; i < snakes.length; i++) {
-            snakes[i].calculateFitness();
-        }
+
+        Arrays.stream(snakes).parallel().forEach(Snake::calculateFitness);
     }
 
     void calculateFitnessSum() {
         fitnessSum = 0;
-        for (int i = 0; i < snakes.length; i++) {
-            fitnessSum += snakes[i].fitness;
-        }
+       /* for (Snake snake : snakes) {
+            fitnessSum += snake.fitness;
+        }*/
+        Arrays.stream(snakes).parallel().forEach(snake -> {
+
+            fitnessSum += snake.fitness;
+        });
     }
 }

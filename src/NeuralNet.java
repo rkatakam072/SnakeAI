@@ -2,10 +2,9 @@ import processing.core.PApplet;
 
 import java.util.Arrays;
 
-class NeuralNet {
-
-    int iNodes, hNodes, oNodes, hLayers;
-    Matrix[] weights;
+public class NeuralNet {
+    private int iNodes, hNodes, oNodes, hLayers;
+    private Matrix[] weights;
 
     NeuralNet(int input, int hidden, int output, int hiddenLayers) {
         iNodes = input;
@@ -13,26 +12,29 @@ class NeuralNet {
         oNodes = output;
         hLayers = hiddenLayers;
 
-        weights = new Matrix[hLayers+1];
-        weights[0] = new Matrix(hNodes, iNodes+1);
-        for(int i=1; i<hLayers; i++) {
-            weights[i] = new Matrix(hNodes,hNodes+1);
-        }
-        weights[weights.length-1] = new Matrix(oNodes,hNodes+1);
+        initializeWeights();
+    }
 
-        for(Matrix w : weights) {
+    private void initializeWeights() {
+        weights = new Matrix[hLayers + 1];
+        weights[0] = new Matrix(hNodes, iNodes + 1);
+        for (int i = 1; i < hLayers; i++) {
+            weights[i] = new Matrix(hNodes, hNodes + 1);
+        }
+        weights[weights.length - 1] = new Matrix(oNodes, hNodes + 1);
+
+        for (Matrix w : weights) {
             w.randomize();
         }
     }
 
-    void mutate(float mr) {
-        Arrays.stream(weights).parallel().forEach(w ->{
+    public void mutate(float mr) {
+        Arrays.stream(weights).parallel().forEach(w -> {
             w.mutate(mr);
         });
-
     }
 
-    float[] output(float[] inputsArr) {
+    public float[] getOutput(float[] inputsArr){
         Matrix inputs = weights[0].singleColumnMatrixFromArray(inputsArr);
 
         Matrix curr_bias = inputs.addBias();
@@ -49,7 +51,7 @@ class NeuralNet {
         return output.toArray();
     }
 
-    NeuralNet crossover(NeuralNet partner) {
+    public NeuralNet crossover(NeuralNet partner) {
         NeuralNet child = new NeuralNet(iNodes,hNodes,oNodes,hLayers);
         for(int i=0; i<weights.length; i++) {
             child.weights[i] = weights[i].crossover(partner.weights[i]);
@@ -66,18 +68,7 @@ class NeuralNet {
         return clone;
     }
 
-    void load(Matrix[] weight) {
-        for(int i=0; i<weights.length; i++) {
-            weights[i] = weight[i];
-        }
-    }
-
-    Matrix[] pull() {
-        Matrix[] model = weights.clone();
-        return model;
-    }
-
-    void show(float x, float y, float w, float h, float[] vision, float[] decision) {
+   public void show(float x, float y, float w, float h, float[] vision, float[] decision) {
         PApplet window = SnakeAI.instance;
         float space = 5;
         float nSize = (h - (space*(iNodes-2))) / iNodes;
@@ -140,9 +131,9 @@ class NeuralNet {
         lc = 1;
 
         //DRAW WEIGHTS
-        for(int i = 0; i < weights[0].rows; i++) {  //INPUT TO HIDDEN
-            for(int j = 0; j < weights[0].cols-1; j++) {
-                if(weights[0].matrix[i][j] < 0) {
+        for(int i = 0; i < weights[0].getRows(); i++) {  //INPUT TO HIDDEN
+            for(int j = 0; j < weights[0].getCols()-1; j++) {
+                if(weights[0].getMatrix()[i][j] < 0) {
                     window.stroke(255,255,0);
                 } else {
                     window.stroke(0,255,255);
@@ -154,9 +145,9 @@ class NeuralNet {
         lc++;
 
         for(int a = 1; a < hLayers; a++) {
-            for(int i = 0; i < weights[a].rows; i++) {  //HIDDEN TO HIDDEN
-                for(int j = 0; j < weights[a].cols-1; j++) {
-                    if(weights[a].matrix[i][j] < 0) {
+            for(int i = 0; i < weights[a].getRows(); i++) {  //HIDDEN TO HIDDEN
+                for(int j = 0; j < weights[a].getCols()-1; j++) {
+                    if(weights[a].getMatrix()[i][j] < 0) {
                         window.stroke(255,255,0);
                     } else {
                         window.stroke(0,255,255);
@@ -167,9 +158,9 @@ class NeuralNet {
             lc++;
         }
 
-        for(int i = 0; i < weights[weights.length-1].rows; i++) {  //HIDDEN TO OUTPUT
-            for(int j = 0; j < weights[weights.length-1].cols-1; j++) {
-                if(weights[weights.length-1].matrix[i][j] < 0) {
+        for(int i = 0; i < weights[weights.length-1].getRows(); i++) {  //HIDDEN TO OUTPUT
+            for(int j = 0; j < weights[weights.length-1].getCols()-1; j++) {
+                if(weights[weights.length-1].getMatrix()[i][j] < 0) {
                     window.stroke(255,255,0);
                 } else {
                     window.stroke(0,255,255);
@@ -186,4 +177,5 @@ class NeuralNet {
         window.text("L",x+(lc*nSize)+(lc*nSpace)+nSize/2,y+oBuff+(2*space)+(2*nSize)+(nSize/2));
         window.text("R",x+(lc*nSize)+(lc*nSpace)+nSize/2,y+oBuff+(3*space)+(3*nSize)+(nSize/2));
     }
+
 }
