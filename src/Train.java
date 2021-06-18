@@ -1,6 +1,6 @@
 public class Train {
     public static void main(String[] args) {
-        Population pop = new Population(1000);
+        Population pop = Population.loadPopulation();
         int highscore = 0;
 
         while (true) {

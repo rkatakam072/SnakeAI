@@ -8,16 +8,19 @@ import java.util.stream.IntStream;
 
 class Population {
 
-    Snake[] snakes;
-    Snake bestSnake;
+    Snake[] snakes; // list of snakes in the species
+    Snake bestSnake; // best snake for replay
 
-    int bestSnakeScore = 0;
-    int gen = 0;
-    int samebest = 0;
+    int bestSnakeScore = 0; // the score of best snake
+    int gen = 0; // generation # of the snake
 
-    float bestFitness = 0;
-    float fitnessSum = 0;
+    float bestFitness = 0; // the fitness of the best snake
+    float fitnessSum = 0; // the sum of fitness for a generation
 
+    /**
+     * constructor
+     * @param size of the population/snakes.length
+     */
     Population(int size) {
         snakes = new Snake[size];
         for (int i = 0; i < snakes.length; i++) {
@@ -27,6 +30,9 @@ class Population {
         bestSnake.replay = true;
     }
 
+    /**
+     * @return the population form a file
+     */
     public synchronized static Population loadPopulation() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         try {
@@ -38,6 +44,10 @@ class Population {
         return null;
     }
 
+    /**
+     * checks if this generation is done/all dead
+     * @return
+     */
     boolean done() {
         if (Arrays.stream(snakes).parallel().anyMatch(snake -> !snake.dead)) {
             return false;
@@ -46,6 +56,7 @@ class Population {
         return bestSnake.dead;
     }
 
+    // save population ot a file
     public synchronized void savePopulation() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setPrettyPrinting();
@@ -60,6 +71,9 @@ class Population {
         }
     }
 
+    /**
+     * updates all of the snakes, including the replay snake
+     */
     void update() {
         if (!bestSnake.dead) {  // this snake is a replay of the best from the past generation
             bestSnake.look();
@@ -87,6 +101,9 @@ class Population {
         });
     }
 
+    /**
+     * shows the snakes
+     */
     void show() {  //show best snake or all the snakes
         if (SnakeAI.replayBest) {
             bestSnake.show();
@@ -98,6 +115,9 @@ class Population {
         }
     }
 
+    /**
+     * sets the best snake for this generation
+     */
     void setBestSnake() {
         float max = 0;
         int maxIndex = 0;
@@ -116,6 +136,10 @@ class Population {
         }
     }
 
+    /**
+     * selects a parent where snakes can reproduce
+     * @return a snake
+     */
     Snake selectParent() {
         float rand = new PApplet().random(fitnessSum);
         float summation = 0;
@@ -128,6 +152,9 @@ class Population {
         return snakes[0];
     }
 
+    /**
+     * runs the general logic for the BestSnake picking
+     */
     void naturalSelection() {
         Snake[] newSnakes = new Snake[snakes.length];
 
@@ -147,11 +174,16 @@ class Population {
         gen += 1;
     }
 
+    /**
+     * loop over all the snakes and calculates there fitness
+     */
     void calculateFitness() {
-
         Arrays.stream(snakes).parallel().forEach(Snake::calculateFitness);
     }
 
+    /**
+     * loop over all snakes and add there fitness to fitnessSum
+     */
     void calculateFitnessSum() {
         fitnessSum = 0;
        /* for (Snake snake : snakes) {

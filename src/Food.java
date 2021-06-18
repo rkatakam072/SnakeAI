@@ -2,8 +2,9 @@ import processing.core.PApplet;
 import processing.core.PVector;
 
 public class Food {
-    PVector pos;
+    PVector pos; // pos of the food
 
+    // constructor
     Food() {
         int x = 400 + SnakeAI.SIZE + PApplet.floor(new PApplet().random(38)) * SnakeAI.SIZE;
         int y = SnakeAI.SIZE + PApplet.floor(new PApplet().random(38)) * SnakeAI.SIZE;
@@ -17,6 +18,7 @@ public class Food {
         window.rect(pos.x, pos.y, SnakeAI.SIZE, SnakeAI.SIZE);
     }
 
+    // clone the food for replay
     public Food clone() {
         Food clone = new Food();
         clone.pos.x = pos.x;

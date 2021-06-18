@@ -9,32 +9,39 @@ import static processing.core.PApplet.pow;
 
 class Snake {
 
-    private int score = 1;
-    int lifeLeft = 200;
-    int lifetime = 0;
-    int xVel, yVel;
+    private int score = 1; // score of the snake/snake-length
+    int lifeLeft = 200; // # of moves left for the snake
+    int lifetime = 0; // # of moves taken by the snake
+    int xVel, yVel; // speed in x and y direction
     int foodItterate = 0;  //used for replay
 
-    float fitness = 0;
+    float fitness = 0; // the value of how good the snake did
 
-    boolean dead = false;
-    boolean replay = false;
+    boolean dead = false; // used to check if the snake is alive
+    boolean replay = false; // if this snake is going to be used for replay
 
-    float[] vision;
-    float[] decision;
+    float[] vision; // what the snake/neural-net sees
+    float[] decision;// the move the snake decided to do
 
-    PVector head;
+    PVector head; // the head of the snake
 
-    ArrayList<PVector> body;
+    ArrayList<PVector> body; // the locations of all of the body squares
     ArrayList<Food> foodList;  // used to replay the best snake
 
-    Food food;
-    NeuralNet brain;
+    Food food; // food for snake
+    NeuralNet brain; // neural net of the snake(used to make a move)
 
+    /**
+     * constructor of snake
+     */
     Snake() {
         this(SnakeAI.hidden_layers);
     }
 
+    /**
+     * constructor
+     * @param layers how many hidden layers in the neural network
+     */
     Snake(int layers) {
         head = new PVector(800, SnakeAI.height / 2f);
         food = new Food();
@@ -51,6 +58,10 @@ class Snake {
 
     }
 
+    /**
+     * this constructor is to setup the replay
+     * @param foods
+     */
     Snake(ArrayList<Food> foods) {
         replay = true;
         vision = new float[24];
@@ -68,6 +79,9 @@ class Snake {
         score += 2;
     }
 
+    /**
+     * checks if the coordinate colide with the food
+     */
     boolean bodyCollide(float x, float y) {
         for (int i = 0; i < body.size(); i++) {
             if (x == body.get(i).x && y == body.get(i).y) {
@@ -77,6 +91,12 @@ class Snake {
         return false;
     }
 
+    /**
+     * checks if a coordinate is on the food
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @return true if it collides with food top left coordinate
+     */
     boolean foodCollide(float x, float y) {
         if (x == food.pos.x && y == food.pos.y) {
             return true;
@@ -84,13 +104,22 @@ class Snake {
         return false;
     }
 
-    boolean wallCollide(float x, float y) {  //check if a position collides with the wall
+    /**
+     * check if a position collides with the wall
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @return true if it collides with the wall
+     */
+    boolean wallCollide(float x, float y) {
         if (x >= SnakeAI.width - (SnakeAI.SIZE) || x < 400 + SnakeAI.SIZE || y >= SnakeAI.height - (SnakeAI.SIZE) || y < SnakeAI.SIZE) {
             return true;
         }
         return false;
     }
 
+    /**
+     * displays the snake on the window
+     */
     void show() {
         PApplet window = SnakeAI.instance;
         food.show();
@@ -107,6 +136,10 @@ class Snake {
         window.rect(head.x, head.y, SnakeAI.SIZE, SnakeAI.SIZE);
     }
 
+    /**
+     * moves the sake if its not dead
+     * also updates necessary variables.
+     */
     void move() {
         if (!dead) {
 
@@ -127,6 +160,10 @@ class Snake {
         }
     }
 
+    /**
+     * eats the food
+     * also increases timeLeft
+     */
     void eat() {
         int len = body.size() - 1;
         score++;
@@ -156,6 +193,9 @@ class Snake {
         }
     }
 
+    /**
+     * shift the body of the snake(used to show how to move)
+     */
     void shiftBody() {
         float tempx = head.x;
         float tempy = head.y;
@@ -173,28 +213,45 @@ class Snake {
         }
     }
 
+    /**
+     * @return a clone of snake used in replay
+     */
     Snake cloneForReplay() {
         Snake clone = new Snake(foodList);
         clone.brain = brain.clone();
         return clone;
     }
 
+    /**
+     * @return a clone of this instance
+     */
     public Snake clone() {
         Snake clone = new Snake(SnakeAI.hidden_layers);
         clone.brain = brain.clone();
         return clone;
     }
 
+    /**
+     * crossover a snake with the parent
+     * @param parent a partner
+     * @return a child snake
+     */
     Snake crossover(Snake parent) {
         Snake child = new Snake(SnakeAI.hidden_layers);
         child.brain = brain.crossover(parent.brain);
         return child;
     }
 
+    /**
+     * mutate the brain
+     */
     void mutate() {  //mutate the snakes brain
         brain.mutate(SnakeAI.mutationRate);
     }
 
+    /**
+     * this is the function to determine how good this snake is(fitness)
+     */
     void calculateFitness() {
         if (score < 10) {
             fitness = floor(lifetime * lifetime) * pow(2, score);
@@ -205,6 +262,9 @@ class Snake {
         }
     }
 
+    /**
+     * sets the snakes vision
+     */
     void look() {
         vision = new float[24];
         float[] temp = lookInDirection(new PVector(-SnakeAI.SIZE, 0));
@@ -241,6 +301,11 @@ class Snake {
         vision[23] = temp[2];
     }
 
+    /**
+     * @param direction the direction to be looking in
+     * @return a float of the values in the direction
+     *         if theres food, if theres a body, and distance to wall
+     */
     float[] lookInDirection(PVector direction) {
         PApplet window;
         window = Objects.requireNonNullElseGet(SnakeAI.instance, PApplet::new);
@@ -290,6 +355,9 @@ class Snake {
         return look;
     }
 
+    /**
+     * let the snake think and set decision
+     */
     void think() {
         decision = brain.getOutput(vision);
         int maxIndex = 0;
@@ -317,13 +385,18 @@ class Snake {
         }
     }
 
+    /**
+     * moves the snake up
+     */
     void moveUp() {
         if (yVel != SnakeAI.SIZE) {
             xVel = 0;
             yVel = -SnakeAI.SIZE;
         }
     }
-
+    /**
+     * moves the snake down
+     */
     void moveDown() {
         if (yVel != -SnakeAI.SIZE) {
             xVel = 0;
@@ -331,6 +404,9 @@ class Snake {
         }
     }
 
+    /**
+     * moves snake to the left
+     */
     void moveLeft() {
         if (xVel != SnakeAI.SIZE) {
             xVel = -SnakeAI.SIZE;
@@ -338,6 +414,9 @@ class Snake {
         }
     }
 
+    /**
+     * moves snake to the right
+     */
     void moveRight() {
         if (xVel != -SnakeAI.SIZE) {
             xVel = SnakeAI.SIZE;
@@ -345,6 +424,9 @@ class Snake {
         }
     }
 
+    /**
+     * @return score of this snake
+     */
     public int getScore() {
         return score;
     }
